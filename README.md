@@ -23,7 +23,7 @@ Combined, the three elements (OpenWebUI pip, n8n workflow, supabase database) al
 - workflow connects to a supabase demo database if you toggle the first node after the webhook to suse_supabase = true, otherwise it uses hard coded values for this demo
 - creates a collapsable element containing COT (Chain of Thought) <thinking> tags above the final message
   
-author: demodomain.dev
-author_url: https://github.com/yupguv
-version: 1.0
-license: MIT
+- author: demodomain.dev
+- author_url: https://github.com/yupguv
+- version: 1.0
+- license: MIT
