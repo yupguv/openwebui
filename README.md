@@ -1,3 +1,6 @@
+Published as a community function:
+https://openwebui.com/f/rabbithole/n8n_pipe
+
 A set of three files that work together:
   1. Pipe for OpenWebUI to allow chatting with an n8n workflow: https://github.com/yupguv/openwebui/blob/main/n8n_pipe_for_openwebui
   2. Demo n8n workflow: https://github.com/yupguv/openwebui/blob/main/n8n_workflow_openwebui_chat
