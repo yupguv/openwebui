@@ -1,13 +1,21 @@
-
 """
 title: N8N pipe for OpwnWebUI. Includes:
-    - pipe connects to n8n by sending user messages to an n8n webhook
+    - create an account here: https://webui.demodomain.dev/ to test the demo of this pip chatting with a live n8n workflow
+    - pipe connects to n8n by sending user messages to an n8n webhook. Valves are:
+        - URL for the main n8n webhook
+        - URL for status check n8n webhook
+        - pipe timeout (seconds)
+        - delay between n8n status check (seconds)
+        - bearer token for authorization to n8n
+        - chatInput field value
+        - output field value
     - pipe sets a looping function (using asyncio) to call another n8n webhook, every 2 seconds to get status updates, and display the latest status in the UI
-        - updates can be "status", or "error", or "no update"
-    - handles errors gracefully and shuts down looping update
+        - updates from n8n can be "status", "no update", or "error"
+    - handles errors gracefully and shuts down the function that checks for updates on a loop
     - uses OpenWebUi's __metadata__.get("chat_id") for chat session management with n8n
     - creates a collapsable element containing COT (Chain of Thought) <thinking> tags above the final message
     - see accompanying demo n8n workflow here: https://github.com/yupguv/openwebui/blob/main/n8n_workflow_openwebui_chat
+    - the demo n8n workflow optionally uses supabase. Table definitions are here: https://github.com/yupguv/openwebui/blob/main/openwebui_n8n_supabase_tables
 author: demodomain.dev
 author_url: https://github.com/yupguv
 version: 1.0
@@ -19,17 +27,20 @@ from pydantic import BaseModel, Field
 import aiohttp
 import asyncio
 
+
 class Pipe:
     class Valves(BaseModel):
         n8n_url: str = Field(
             default="https://n8n.[your domain].com/webhook/[your webhook URL]"
         )
-        n8n_bearer_token: str = Field(default="...")
-        input_field: str = Field(default="chatInput")
-        response_field: str = Field(default="output")
         n8n_status_check: str = Field(
             default="https://n8n.[your domain].com/webhook/[your webhook URL]"
         )
+        n8n_bearer_token: str = Field(default="6gdw363gfsh37ydnvb7")
+        input_field: str = Field(default="chatInput")
+        response_field: str = Field(default="output")
+        status_check_delay_seconds: int = Field(default=2)
+        pipe_timeout_seconds: int = Field(default=10)
 
     def __init__(self):
         self.type = "pipe"
@@ -75,7 +86,6 @@ class Pipe:
             "Content-Type": "application/json",
         }
         payload = {
-            # "sessionId": f"{__user__['id']} - {body['messages'][0]['content'].split('Prompt: ')[-1][:100]}",
             "sessionId": __metadata__.get("chat_id"),
             "user_id": __user__["id"],
             "input": "status check",
@@ -88,7 +98,7 @@ class Pipe:
                     self.valves.n8n_status_check,
                     json=payload,
                     headers=headers,
-                    timeout=5,
+                    timeout=self.valves.pipe_timeout_seconds,
                 ) as response:
                     if response.status == 200:
                         response_data = await response.json()
@@ -123,7 +133,6 @@ class Pipe:
                     {
                         "type": "message",
                         "data": {"content": message},
-                        # Note that with message types we do NOT have to set a done condition
                     }
                 )
 
@@ -137,27 +146,23 @@ class Pipe:
                     __user__,
                 )
 
-                # Cancel the status loop task
                 if self.status_loop_task is not None:
                     self.status_loop_task.cancel()
-                    self.status_loop_task = None  # Reset the task reference
+                    self.status_loop_task = None
 
-                break  # Exit the loop
+                break
 
             else:
                 if message == "no update":
-                    # message = "thinking"
                     # do nothing
                     pass
                 elif "<details>" in message:
-                    # Format the response
                     message = message.replace(r"\n", "\n")
 
                     self.thinking_messages.append(
                         {"role": "assistant", "content": message}
                     )
 
-                    # Emit the "thinking" message
                     await __event_emitter__(
                         {
                             "type": "message",
@@ -176,7 +181,7 @@ class Pipe:
                         __user__,
                     )
 
-                await asyncio.sleep(2)
+                await asyncio.sleep(self.valves.status_check_delay_seconds)
 
     async def pipe(
         self,
@@ -217,7 +222,6 @@ class Pipe:
                     "Content-Type": "application/json",
                 }
                 payload = {
-                    # "sessionId": f"{__user__['id']} - {messages[0]['content'].split('Prompt: ')[-1][:100]}",
                     "sessionId": __metadata__.get("chat_id"),
                     "user_id": __user__["id"],
                 }
@@ -229,12 +233,13 @@ class Pipe:
                             self.valves.n8n_url,
                             json=payload,
                             headers=headers,
-                            timeout=90,
+                            timeout=self.valves.pipe_timeout_seconds,
                         ) as response:
                             if response.status == 200:
                                 # response_data = await response.json()
                                 response_data = await asyncio.wait_for(
-                                    response.json(), timeout=60
+                                    response.json(),
+                                    timeout=self.valves.pipe_timeout_seconds,
                                 )
                                 n8n_response = response_data[self.valves.response_field]
                             else:
@@ -274,9 +279,6 @@ class Pipe:
                         __user__,
                     )
                     return {"error": str(e)}
-
-                # Format as markdown and you get the code in a pop-out window :)
-                # n8n_response = f"```\nhtml{n8n_response}\n```"
 
                 # Check for NULL response
                 if n8n_response is None:
