@@ -4,6 +4,8 @@ A set of three files that work together:
   3. Table definitions if you want to use Supabase nodes in the demo n8n workflow: https://github.com/yupguv/openwebui/blob/main/openwebui_n8n_supabase_tables
 
 create an account here: https://webui.demodomain.dev/ to test the demo of this OpenWebUI pipe chatting with a live n8n workflow
+        - or log in using null@void.com, with a password of 12345
+        - If you do create an account, you can use a fake email, and if you use your real one, I won't spam you or anything stupid
 
 Combined, the three elements (OpenWebUI pip, n8n workflow, supabase database) allow the following:
 - OpenWebUI pipe connects to n8n by sending user messages to an n8n webhook. Valves are:
