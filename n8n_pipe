@@ -1,3 +1,17 @@
+"""
+title: N8N pipe for OpwnWebUI. Includes:
+    - pipe connects to n8n by sending user messaged to an n8n webhook
+    - pipe then calls another n8n webhook, every 2 seconds to get status updates, using asyncio
+        - updates can be status, or error
+    - handles errors gracefully and shuts down looping update
+    - uses OpenWebUi's __metadata__.get("chat_id") for chat session management with n8n
+    - 
+author: demodomain.dev
+author_url: https://github.com/yupguv
+version: 1.0
+license: MIT
+"""
+
 from typing import Optional, Callable, Awaitable
 from pydantic import BaseModel, Field
 import aiohttp
@@ -17,8 +31,8 @@ class Pipe:
 
     def __init__(self):
         self.type = "pipe"
-        self.id = "eVA"
-        self.name = "eVA"
+        self.id = "n8nConnector"
+        self.name = "n8nConnector"
         self.valves = self.Valves()
         self.status_loop_task = None
         self.thinking_messages = []
