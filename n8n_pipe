@@ -1,11 +1,12 @@
 """
 title: N8N pipe for OpwnWebUI. Includes:
-    - pipe connects to n8n by sending user messaged to an n8n webhook
-    - pipe then calls another n8n webhook, every 2 seconds to get status updates, using asyncio
-        - updates can be status, or error
+    - pipe connects to n8n by sending user messages to an n8n webhook
+    - pipe sets a looping function (using asyncio) to call another n8n webhook, every 2 seconds to get status updates, and display the latest status in the UI
+        - updates can be "status", or "error", or "no update"
     - handles errors gracefully and shuts down looping update
     - uses OpenWebUi's __metadata__.get("chat_id") for chat session management with n8n
-    - 
+    - creates a collapsable element containing COT (Chain of Thought) <thinking> tags above the final message
+    - see accompanying demo n8n workflow here: https://github.com/yupguv/openwebui/blob/main/n8n_workflow_openwebui_chat
 author: demodomain.dev
 author_url: https://github.com/yupguv
 version: 1.0
