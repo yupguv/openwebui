@@ -6,10 +6,10 @@ A set of three files that work together:
 create an account here: https://webui.demodomain.dev/ to test the demo of this OpenWebUI pipe chatting with a live n8n workflow
 
 Combined, the three elements (OpenWebUI pip, n8n workflow, supabase database) allow the following:
-    - OpenWebUI pipe connects to n8n by sending user messages to an n8n webhook. Valves are:
-        - URL for the main n8n webhook
-        - URL for status check n8n webhook
-        - pipe timeout (seconds)
+  - OpenWebUI pipe connects to n8n by sending user messages to an n8n webhook. Valves are:
+  -     - URL for the main n8n webhook
+  -     - URL for status check n8n webhook
+  -     - pipe timeout (seconds)
         - delay between n8n status check (seconds)
         - bearer token for authorization to n8n
         - chatInput field value
