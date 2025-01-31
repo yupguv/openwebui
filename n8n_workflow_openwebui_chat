@@ -1,0 +1,2217 @@
+{
+  "name": "OpenWebUI chat",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "74ef0fdd-24a8-4a97-bdbf-52d5c938c912",
+              "name": "output",
+              "value": "={{ $('Extract cot').item.json.thinking != null ? \n\n\"<details>\\n<summary>Click to expand chain of thought</summary>\\n\" + $('Extract cot').item.json.thinking + \"\\n</details>\\n\" + $('Extract cot').item.json.output : \n\n$('Extract cot').item.json.output }}\n{{ (new Date() - new Date($('Set data').item.json.start_time)) / 1000 }} seconds",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3320,
+        1980
+      ],
+      "id": "71ecbc77-518d-4aa4-8ffd-e4b5254f80ff",
+      "name": "Set output"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "users",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_openweb_id",
+              "keyValue": "={{ $('OpenWeb UI').item.json.body.user_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -4600,
+        1980
+      ],
+      "id": "460d2cc6-239b-4aba-969d-8a0bca5f104b",
+      "name": "Check user",
+      "credentials": {
+        "supabaseApi": {
+          "id": "JDiEIEE1dTuMXVhZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "8f627be5-22f6-47d4-a5c2-cea17f4f76d1",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -5860,
+        2080
+      ],
+      "id": "5aa3d128-6a90-4056-a736-7a3ebc2cb95f",
+      "name": "OpenWeb UI",
+      "webhookId": "8f627be5-22f6-47d4-a5c2-cea17f4f76d1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"output\": {{ JSON.stringify(\"Received erroneous input from OpenWeb UI. You can ignore this message and resend your previous message again.\") }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -4680,
+        1820
+      ],
+      "id": "51837b5c-9b28-4699-be8d-c5eb5dfffc8c",
+      "name": "Respond to Webhook3"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.chatInput.includes(\"You are an autocompletion system\") || \n\n$json.body.chatInput.includes(\"Suitable Emojis for the summary\") }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "skip"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -5220,
+        2080
+      ],
+      "id": "af35327d-f5ad-4288-9de7-6266e7613259",
+      "name": "OpenWeb system function?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c28b9893-2319-4936-9bb8-8432d3392367",
+              "name": "output",
+              "value": "={{ $json.output.includes(\"<answer>\") ? $json.output.split(\"<answer>\")[1].split(\"</answer>\")[0].trim().split(\"<reflection>\")[0].trim() : $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "92b506e3-3c0a-4ed8-849c-a5eb1e3dab36",
+              "name": "thinking",
+              "value": "={{ $json.output.includes(\"<thinking>\") ? $json.output.split(\"<thinking>\")[1].split(\"</thinking>\")[0].trim() : null }}",
+              "type": "string"
+            },
+            {
+              "id": "ebc71424-426b-40e2-92d9-bb05bbd54574",
+              "name": "reflection",
+              "value": "={{ $json.output.includes(\"<reflection>\") ? $json.output.split(\"<reflection>\")[1].split(\"</reflection>\")[0].trim() : null }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3540,
+        1980
+      ],
+      "id": "56c00c17-d5ac-483d-b1eb-0b37b7296696",
+      "name": "Extract cot"
+    },
+    {
+      "parameters": {
+        "tableId": "responses",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "response",
+              "fieldValue": "={{ $json.output }}"
+            },
+            {
+              "fieldId": "openwebui_id",
+              "fieldValue": "={{ $('Set data').item.json.id }}"
+            },
+            {
+              "fieldId": "role",
+              "fieldValue": "ai"
+            },
+            {
+              "fieldId": "thread_id",
+              "fieldValue": "={{ $('Set data').item.json.message_thread_id }}"
+            },
+            {
+              "fieldId": "seconds",
+              "fieldValue": "={{ (new Date() - new Date($('Set data').item.json.start_time)) / 1000 }}"
+            },
+            {
+              "fieldId": "execution_id",
+              "fieldValue": "={{ $execution.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -2880,
+        1740
+      ],
+      "id": "37a953c7-b848-446d-96b0-077e2c5a9c46",
+      "name": "Add response and seconds",
+      "credentials": {
+        "supabaseApi": {
+          "id": "JDiEIEE1dTuMXVhZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return null"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2880,
+        1980
+      ],
+      "id": "e70ffb7b-a812-4cdd-8b7b-3894b31b3285",
+      "name": "Output nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e89907f9-d818-4a55-8bf3-aa05d8d75564",
+              "name": "use_supabase",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5600,
+        2080
+      ],
+      "id": "efa2987c-5078-47de-b6f7-980a6fcadcd0",
+      "name": "use supabase?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "58f6ee2f-020d-4ad6-af28-ebde1c83f06b",
+              "name": "message_text",
+              "value": "={{ $('OpenWeb UI').item.json.body.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "d95b873e-9b44-4ea0-9bc2-a9606bd1a30a",
+              "name": "message_thread_id",
+              "value": "={{ $('OpenWeb UI').item.json.body.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "b35fb60f-ef96-4c21-8f30-487883215083",
+              "name": "message_from_id",
+              "value": "={{ $('OpenWeb UI').item.json.body.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "f62d346b-e559-46ae-87cf-3c00bcd211e9",
+              "name": "start_time",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4400,
+        1980
+      ],
+      "id": "3ffe6292-ebf3-48a8-9006-19963206fcfd",
+      "name": "Set data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "58f6ee2f-020d-4ad6-af28-ebde1c83f06b",
+              "name": "message_text",
+              "value": "={{ Array.isArray($('OpenWeb UI').item.json.body.chatInput) ? $('OpenWeb UI').item.json.body.chatInput[0].text : $('OpenWeb UI').item.json.body.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "d95b873e-9b44-4ea0-9bc2-a9606bd1a30a",
+              "name": "message_thread_id",
+              "value": "={{ $('OpenWeb UI').item.json.body.sessionId.toString() }}",
+              "type": "string"
+            },
+            {
+              "id": "b35fb60f-ef96-4c21-8f30-487883215083",
+              "name": "message_from_id",
+              "value": "={{ $('OpenWeb UI').item.json.body.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "f62d346b-e559-46ae-87cf-3c00bcd211e9",
+              "name": "start_time",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4600,
+        2200
+      ],
+      "id": "9bf26caa-d68c-4d5f-9970-5dc4abb159e7",
+      "name": "Hard coded values"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c28b9893-2319-4936-9bb8-8432d3392367",
+              "name": "output",
+              "value": "=<thinking>\nSome thinking in here.\n</thinking>\n<answer>\nHere is my answer.\n</answer>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3760,
+        1980
+      ],
+      "id": "bdd09479-b918-4909-a5dc-9733d4886db0",
+      "name": "AI replacement data"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('use supabase?').item.json.use_supabase }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "supabase"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -4920,
+        2080
+      ],
+      "id": "d94ae914-5e6b-49ae-bb0e-348083a25bb2",
+      "name": "Use supabase?"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('use supabase?').item.json.use_supabase }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "supabase"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -3100,
+        1740
+      ],
+      "id": "333ee276-d958-4714-90f6-b2339a7903fd",
+      "name": "Use supabase?2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -3080,
+        1980
+      ],
+      "id": "b918194a-d4e5-4ffc-881a-7143d221720b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "tableId": "responses",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "response",
+              "fieldValue": "Some processing is happening"
+            },
+            {
+              "fieldId": "openwebui_id",
+              "fieldValue": "={{ $json.user_openweb_id }}"
+            },
+            {
+              "fieldId": "role",
+              "fieldValue": "ai status"
+            },
+            {
+              "fieldId": "thread_id",
+              "fieldValue": "={{ $('OpenWeb UI').item.json.body.sessionId }}"
+            },
+            {
+              "fieldId": "role",
+              "fieldValue": "status"
+            },
+            {
+              "fieldId": "execution_id",
+              "fieldValue": "={{ $execution.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -4200,
+        1980
+      ],
+      "id": "60c571f9-9fb9-44af-9327-144a0897a146",
+      "name": "Set status message",
+      "credentials": {
+        "supabaseApi": {
+          "id": "JDiEIEE1dTuMXVhZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3980,
+        1980
+      ],
+      "id": "06228a04-7880-4527-9de5-3b7d99493bfc",
+      "name": "Wait to ensure OpenWebUI gets status update",
+      "webhookId": "acbd6457-dbf4-4d72-bb66-209fc28b983d"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6632d4ab-b0a8-43be-a55e-0b147b06ee6e",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -5860,
+        1200
+      ],
+      "id": "46e50b23-55e1-41c0-80e3-28a8e88fb211",
+      "name": "Webhook",
+      "webhookId": "6632d4ab-b0a8-43be-a55e-0b147b06ee6e"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "99db098b-2cd1-4406-ac56-02a8ac5442f5",
+              "name": "email",
+              "value": "={{ JSON.parse($('Webhook').item.json.body.user).email }}",
+              "type": "string"
+            },
+            {
+              "id": "ebd920c1-5193-462c-9b44-7247a852bea7",
+              "name": "user_id",
+              "value": "={{ JSON.parse($('Webhook').item.json.body.user).id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5220,
+        1200
+      ],
+      "id": "ff586100-2b93-4462-9582-1904452060b4",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "tableId": "users",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_openweb_id",
+              "fieldValue": "={{ $json.user_id }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.email }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -4760,
+        1200
+      ],
+      "id": "63704135-3b82-483c-a8bd-d6eb31a021eb",
+      "name": "Register OpenWeb user",
+      "credentials": {
+        "supabaseApi": {
+          "id": "JDiEIEE1dTuMXVhZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook1').item.json.headers.authorization === \"Bearer 6gdw363gfsh37ydnvb7\" && $('Webhook1').item.json.body.chatInput.includes(\"status check\") }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "process"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -5400,
+        3100
+      ],
+      "id": "7c4cc5b4-047b-4ef1-94ee-c8ac1b6cc5ff",
+      "name": "valid?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM responses\nWHERE thread_id = '{{ $('Webhook1').item.json.body.sessionId }}'\n  AND role = 'status'\n  AND retrieved IS FALSE\n  ORDER BY id DESC LIMIT 1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -4620,
+        3100
+      ],
+      "id": "520a459d-6c68-47d6-a923-e7932ba00e9a",
+      "name": "Check for latest status",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "oizCJqvah9vXr9m9",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM responses\nWHERE thread_id = '{{ $('Webhook1').item.json.body.sessionId }}'\n  AND role = 'error'\n  AND retrieved IS FALSE\n  ORDER BY id DESC LIMIT 1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -5040,
+        3100
+      ],
+      "id": "d5764e23-602a-4c2f-87bb-ed3c0919e7d0",
+      "name": "Check for unhandled errors",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "oizCJqvah9vXr9m9",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.id > 0 }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "error"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -4840,
+        3100
+      ],
+      "id": "c67f2606-e2f6-4db1-ba9d-d3149a7701b4",
+      "name": "Error?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "29700dc9-7c4e-4303-9f43-d4eec0914268",
+              "name": "output",
+              "value": "={{ $json.response }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3920,
+        2860
+      ],
+      "id": "7ff0d728-de70-4663-8ecf-510786d9c115",
+      "name": "Set final status message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "29700dc9-7c4e-4303-9f43-d4eec0914268",
+              "name": "output",
+              "value": "=Error - {{ $json.response }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4380,
+        2620
+      ],
+      "id": "3d158e00-4c89-4264-8a88-db710ac329fb",
+      "name": "set error message"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.id > 0 }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "status found"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -4440,
+        3100
+      ],
+      "id": "afc46942-d331-4da4-8759-381c2867f73f",
+      "name": "New status?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "responses",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "thread_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook1').item.json.body.sessionId }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "retrieved",
+              "fieldValue": "true"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -4200,
+        2820
+      ],
+      "id": "16580152-4048-4a40-ac1c-d614d38e0595",
+      "name": "Update all to retrieved1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "JDiEIEE1dTuMXVhZ",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "29700dc9-7c4e-4303-9f43-d4eec0914268",
+              "name": "output",
+              "value": "no update",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4160,
+        3100
+      ],
+      "id": "9ea7871d-aa4c-45e3-9a4f-3c8d8b690947",
+      "name": "Set no update"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "98afd693-e6e9-4d18-bb72-0291622dc68c",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -5860,
+        3100
+      ],
+      "id": "00e8c611-c956-4def-b28c-a30c51641a2e",
+      "name": "Webhook1",
+      "webhookId": "98afd693-e6e9-4d18-bb72-0291622dc68c"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -3660,
+        3100
+      ],
+      "id": "4c1615bf-b950-461e-9517-61eaf949ce57",
+      "name": "Respond to Webhook5"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -5860,
+        3740
+      ],
+      "id": "16e441c2-9767-46d9-b9dd-2ea21d4a9ade",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.id > 0}}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "user_found"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -5120,
+        3740
+      ],
+      "id": "319f34c7-d788-4941-b009-e1700a44ed29",
+      "name": "Execution exists?"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Error Trigger').first().json.execution.id > 0 }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "continue"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -5580,
+        3740
+      ],
+      "id": "772f0d4d-c763-48cb-a617-78cd0f0277ff",
+      "name": "execution_id and send to user?"
+    },
+    {
+      "parameters": {
+        "content": "## Add new user \nAll users who register on OpenWeb will get added to the database here.\n\nI've set my OpenWebUI demo site to call this webhook when a new user registers.\n\nYou don't have to do this. In fact this demo workflow doesn't even use the user data received by this webhook; it's merely here to show how you can add user's to a supabase table when they register with OpenWebUI.\n\nTo log inputs, outputs, status updates, and errors, this workflow simply uses the OpenWebUI session id as the unique identifier.",
+        "height": 520
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6200,
+        1180
+      ],
+      "id": "1b63cd77-d13c-4c51-be3f-f4588af2504e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## OpenWebUI chat webhook \nAll messages from OpenWebUI get sent here"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6200,
+        2040
+      ],
+      "id": "2f6de0c3-c3fb-45ae-9a51-2a45f207603c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## OpenWebUI status check\nOpenWebUI calls this webhook to get status updates"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6200,
+        3060
+      ],
+      "id": "2301267f-9ab2-4a3c-96e4-8824e732756e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Capture unhandled errors\nWe must capture unhandled errors in n8n and inform the OpenWebUI looping check to stop looping",
+        "height": 200
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6200,
+        3700
+      ],
+      "id": "7de9ae4d-ce59-4ca0-ac3a-5b1a8390627a",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "users",
+        "limit": 1,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "current_execution_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Error Trigger').item.json.execution.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -5340,
+        3740
+      ],
+      "id": "71d9dddd-2f5c-4f51-9d7f-956f9cd6229c",
+      "name": "execution_id exists for user?",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JDiEIEE1dTuMXVhZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "users",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_openweb_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.user_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "openweb_thread_id",
+              "fieldValue": "={{ $json.body.sessionId }}"
+            },
+            {
+              "fieldId": "current_execution_id",
+              "fieldValue": "={{ $execution.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -5000,
+        1600
+      ],
+      "id": "62288de5-4d21-4e69-9823-3506d7391b9d",
+      "name": "Set thread and execution ids",
+      "credentials": {
+        "supabaseApi": {
+          "id": "JDiEIEE1dTuMXVhZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "responses",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "role",
+              "fieldValue": "error"
+            },
+            {
+              "fieldId": "response",
+              "fieldValue": "={{ $('Error Trigger').item.json.execution.error.message }}"
+            },
+            {
+              "fieldId": "thread_id",
+              "fieldValue": "={{ $('execution_id exists for user?').item.json.current_execution_id }}"
+            },
+            {
+              "fieldId": "openwebui_id",
+              "fieldValue": "={{ $('execution_id exists for user?').item.json.user_openweb_id }}"
+            },
+            {
+              "fieldId": "execution_id",
+              "fieldValue": "={{ $('execution_id exists for user?').item.json.current_execution_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -4860,
+        3740
+      ],
+      "id": "7ef2e9ef-2bd8-4a5d-8624-240a7e368875",
+      "name": "Add error",
+      "credentials": {
+        "supabaseApi": {
+          "id": "JDiEIEE1dTuMXVhZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('use supabase?').item.json.use_supabase }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "supabase"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -5220,
+        1820
+      ],
+      "id": "43554ccd-a84a-4333-93a5-0740ed9e0d87",
+      "name": "Use supabase?4"
+    },
+    {
+      "parameters": {
+        "tableId": "responses",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "response",
+              "fieldValue": "={{ $('OpenWeb UI').item.json.body.chatInput }}"
+            },
+            {
+              "fieldId": "openwebui_id",
+              "fieldValue": "={{ $('OpenWeb UI').item.json.body.user_id }}"
+            },
+            {
+              "fieldId": "role",
+              "fieldValue": "human"
+            },
+            {
+              "fieldId": "thread_id",
+              "fieldValue": "={{ $('OpenWeb UI').item.json.body.sessionId }}"
+            },
+            {
+              "fieldId": "execution_id",
+              "fieldValue": "={{ $execution.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -5000,
+        1820
+      ],
+      "id": "af3c82e6-72ae-4e00-87d4-fa028042d4a6",
+      "name": "Add human response",
+      "credentials": {
+        "supabaseApi": {
+          "id": "JDiEIEE1dTuMXVhZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "58f6ee2f-020d-4ad6-af28-ebde1c83f06b",
+              "name": "message_text",
+              "value": "={{ $('OpenWeb UI').item.json.body.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "d95b873e-9b44-4ea0-9bc2-a9606bd1a30a",
+              "name": "message_thread_id",
+              "value": "={{ $('OpenWeb UI').item.json.body.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "b35fb60f-ef96-4c21-8f30-487883215083",
+              "name": "message_from_id",
+              "value": "={{ $('OpenWeb UI').item.json.body.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "f62d346b-e559-46ae-87cf-3c00bcd211e9",
+              "name": "start_time",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4400,
+        2200
+      ],
+      "id": "f0142e9a-d414-4b84-bb59-edab46ea8779",
+      "name": "Set data1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3980,
+        2200
+      ],
+      "id": "51d0fc66-9b0a-4b3c-bd21-ec615c3c8ab1",
+      "name": "Wait to ensure OpenWebUI gets status update1",
+      "webhookId": "acbd6457-dbf4-4d72-bb66-209fc28b983d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "74ef0fdd-24a8-4a97-bdbf-52d5c938c912",
+              "name": "output",
+              "value": "={{ $('Extract cot1').item.json.thinking != null ? \n\n\"<details>\\n<summary>Click to expand chain of thought</summary>\\n\" + $('Extract cot1').item.json.thinking + \"\\n</details>\\n\" + $('Extract cot1').item.json.output : \n\n$('Extract cot1').item.json.output }}\n{{ (new Date() - new Date($('Set data1').item.json.start_time)) / 1000 }} seconds",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3320,
+        2200
+      ],
+      "id": "a37398f9-232a-4ee7-9e75-40d4aa9f2adb",
+      "name": "Set output1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c28b9893-2319-4936-9bb8-8432d3392367",
+              "name": "output",
+              "value": "={{ $json.output.includes(\"<answer>\") ? $json.output.split(\"<answer>\")[1].split(\"</answer>\")[0].trim().split(\"<reflection>\")[0].trim() : $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "92b506e3-3c0a-4ed8-849c-a5eb1e3dab36",
+              "name": "thinking",
+              "value": "={{ $json.output.includes(\"<thinking>\") ? $json.output.split(\"<thinking>\")[1].split(\"</thinking>\")[0].trim() : null }}",
+              "type": "string"
+            },
+            {
+              "id": "ebc71424-426b-40e2-92d9-bb05bbd54574",
+              "name": "reflection",
+              "value": "={{ $json.output.includes(\"<reflection>\") ? $json.output.split(\"<reflection>\")[1].split(\"</reflection>\")[0].trim() : null }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3540,
+        2200
+      ],
+      "id": "19f2f079-cd3c-42e2-a0bf-f1db2d35f7a3",
+      "name": "Extract cot1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c28b9893-2319-4936-9bb8-8432d3392367",
+              "name": "output",
+              "value": "=<thinking>\nSome thinking in here.\n</thinking>\n<answer>\nHere is my answer.\n</answer>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3760,
+        2200
+      ],
+      "id": "dde6e54e-1062-4ef5-8c2d-fba34693db50",
+      "name": "AI replacement data1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e89907f9-d818-4a55-8bf3-aa05d8d75564",
+              "name": "use_supabase",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5600,
+        3100
+      ],
+      "id": "aca0013c-8e4e-4b34-b874-48af546fdc89",
+      "name": "use supabase?1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('use supabase?1').item.json.use_supabase }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "supabase"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -5220,
+        3100
+      ],
+      "id": "73b6b902-5cd4-4e56-8202-c9426a5ffd59",
+      "name": "Use supabase?5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "29700dc9-7c4e-4303-9f43-d4eec0914268",
+              "name": "output",
+              "value": "This is a status update from n8n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4680,
+        3340
+      ],
+      "id": "e1628763-33aa-4fdd-9fb6-9f5d72d338dd",
+      "name": "Set final status message1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('use supabase?2').item.json.use_supabase }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "supabase"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -5020,
+        1200
+      ],
+      "id": "18552fe4-0689-4cc8-95a7-abe07a830713",
+      "name": "Use supabase?6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e89907f9-d818-4a55-8bf3-aa05d8d75564",
+              "name": "use_supabase",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5600,
+        1200
+      ],
+      "id": "b606fe19-eb1f-450f-afd8-093e40539a1e",
+      "name": "use supabase?2"
+    },
+    {
+      "parameters": {
+        "content": "## use_supabase flag \ntrue = will use Supabase nodes\nfalse = will use hard-coded data",
+        "height": 2300,
+        "width": 220,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5660,
+        1000
+      ],
+      "typeVersion": 1,
+      "id": "1cd4925b-4081-4d45-bb22-17c45d6f05d7",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('OpenWeb UI').item.json.headers.authorization === \"Bearer 6gdw363gfsh37ydnvb7\" }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "process"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -5400,
+        2080
+      ],
+      "id": "d3ee22af-da91-41d9-9ba3-a7ad81ad66b0",
+      "name": "valid?1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{  1 === 1 }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "process"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -5400,
+        1200
+      ],
+      "id": "734e5d81-c54f-4329-b9d6-f07ae6a32197",
+      "name": "valid?2"
+    },
+    {
+      "parameters": {
+        "content": "## AI Agent node goes here \nFor this demo, the workflow simply outputs some hard-coded contact to simulate an AI response.",
+        "height": 720,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3820,
+        1640
+      ],
+      "typeVersion": 1,
+      "id": "02385b63-2ba5-435f-9516-b80b3ff38798",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Readme \ntitle: N8N workflow for OpwnWebUI. Includes:\n    - n8n workflow that accepts incoming webhooks requests from OpenWebUI, updates the status, and returns a response\n    - bearer token is sent by OpenWebUI and n8n verifies token\n    - workflow connects to a supabase demo database if you toggle the first node after the webhook to suse_supabase = true, otherwise it uses hard coded values for this demo\n    - see accompanying demo OpenWebUI pipe here: https://github.com/yupguv/openwebui/blob/main/n8n_pipe_for_openwebui\nauthor: demodomain.dev\nauthor_url: https://github.com/yupguv\nversion: 1.0\nlicense: MIT",
+        "height": 300,
+        "width": 960,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -6200,
+        620
+      ],
+      "typeVersion": 1,
+      "id": "16d78936-21fa-45d0-aa9b-dab3ebf44228",
+      "name": "Sticky Note6"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Set output": {
+      "main": [
+        [
+          {
+            "node": "Use supabase?2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check user": {
+      "main": [
+        [
+          {
+            "node": "Set data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeb UI": {
+      "main": [
+        [
+          {
+            "node": "use supabase?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeb system function?": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Use supabase?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract cot": {
+      "main": [
+        [
+          {
+            "node": "Set output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "use supabase?": {
+      "main": [
+        [
+          {
+            "node": "valid?1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Use supabase?4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set data": {
+      "main": [
+        [
+          {
+            "node": "Set status message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hard coded values": {
+      "main": [
+        [
+          {
+            "node": "Set data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI replacement data": {
+      "main": [
+        [
+          {
+            "node": "Extract cot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use supabase?": {
+      "main": [
+        [
+          {
+            "node": "Check user",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hard coded values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use supabase?2": {
+      "main": [
+        [
+          {
+            "node": "Add response and seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Output nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set status message": {
+      "main": [
+        [
+          {
+            "node": "Wait to ensure OpenWebUI gets status update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait to ensure OpenWebUI gets status update": {
+      "main": [
+        [
+          {
+            "node": "AI replacement data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "use supabase?2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Use supabase?6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "valid?": {
+      "main": [
+        [
+          {
+            "node": "Use supabase?5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for latest status": {
+      "main": [
+        [
+          {
+            "node": "New status?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for unhandled errors": {
+      "main": [
+        [
+          {
+            "node": "Error?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error?": {
+      "main": [
+        [
+          {
+            "node": "set error message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update all to retrieved1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check for latest status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set final status message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set error message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New status?": {
+      "main": [
+        [
+          {
+            "node": "Set final status message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update all to retrieved1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set no update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set no update": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "use supabase?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "execution_id and send to user?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execution exists?": {
+      "main": [
+        [
+          {
+            "node": "Add error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "execution_id and send to user?": {
+      "main": [
+        [
+          {
+            "node": "execution_id exists for user?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "execution_id exists for user?": {
+      "main": [
+        [
+          {
+            "node": "Execution exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use supabase?4": {
+      "main": [
+        [
+          {
+            "node": "Add human response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set thread and execution ids",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set data1": {
+      "main": [
+        [
+          {
+            "node": "Wait to ensure OpenWebUI gets status update1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract cot1": {
+      "main": [
+        [
+          {
+            "node": "Set output1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI replacement data1": {
+      "main": [
+        [
+          {
+            "node": "Extract cot1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait to ensure OpenWebUI gets status update1": {
+      "main": [
+        [
+          {
+            "node": "AI replacement data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set output1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "use supabase?1": {
+      "main": [
+        [
+          {
+            "node": "valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use supabase?5": {
+      "main": [
+        [
+          {
+            "node": "Check for unhandled errors",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set final status message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set final status message1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use supabase?6": {
+      "main": [
+        [
+          {
+            "node": "Register OpenWeb user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "use supabase?2": {
+      "main": [
+        [
+          {
+            "node": "valid?2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "valid?1": {
+      "main": [
+        [
+          {
+            "node": "OpenWeb system function?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "valid?2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 60,
+    "errorWorkflow": "CFfBMte9SIT4VXGI"
+  },
+  "versionId": "084c2850-82ca-4ae3-8a53-3f8818858d62",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0dd4d74541869392215391e2f2007af2df2b56dd54164ba601db9e62bc64e806"
+  },
+  "id": "CFfBMte9SIT4VXGI",
+  "tags": []
+}
