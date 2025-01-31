@@ -336,7 +336,7 @@
             {
               "id": "c28b9893-2319-4936-9bb8-8432d3392367",
               "name": "output",
-              "value": "=<thinking>\nSome thinking in here.\n</thinking>\n<answer>\nHere is my answer.\n</answer>",
+              "value": "=<thinking>\nSome thinking in here. OpenWebUI supports collapsable thinking tags. See the pipe code to see how to format the text so OpenWebUI sees it as a collapsable object.\n</thinking>\n<answer>\nHere is my answer. You're going to get the same answer over and over as this is just a demo to show that you get a status update from n8n, and then a reply from n8n. Of course, the reply from n8n could be from an AI Agent.\n\nYou can get the OpenWebUI pip code from here:\nhttps://openwebui.com/f/rabbithole/n8n_pipe\n\nYou can view the Github repository (https://github.com/yupguv/openwebui) to get the pipe code, as well as the n8n workflow JSON (code) and the supabase (postgres) database schema to easily set up a database and test the n8n workflow with database data, rather than hard-coded data.\n</answer>",
               "type": "string"
             }
           ]
@@ -902,7 +902,7 @@
       "typeVersion": 1,
       "position": [
         -5860,
-        3740
+        3880
       ],
       "id": "16e441c2-9767-46d9-b9dd-2ea21d4a9ade",
       "name": "Error Trigger"
@@ -945,7 +945,7 @@
       "typeVersion": 3.2,
       "position": [
         -5120,
-        3740
+        3880
       ],
       "id": "319f34c7-d788-4941-b009-e1700a44ed29",
       "name": "Execution exists?"
@@ -988,7 +988,7 @@
       "typeVersion": 3.2,
       "position": [
         -5580,
-        3740
+        3880
       ],
       "id": "772f0d4d-c763-48cb-a617-78cd0f0277ff",
       "name": "execution_id and send to user?"
@@ -1042,7 +1042,7 @@
       "typeVersion": 1,
       "position": [
         -6200,
-        3700
+        3840
       ],
       "id": "7de9ae4d-ce59-4ca0-ac3a-5b1a8390627a",
       "name": "Sticky Note3"
@@ -1067,7 +1067,7 @@
       "typeVersion": 1,
       "position": [
         -5340,
-        3740
+        3880
       ],
       "id": "71d9dddd-2f5c-4f51-9d7f-956f9cd6229c",
       "name": "execution_id exists for user?",
@@ -1152,7 +1152,7 @@
       "typeVersion": 1,
       "position": [
         -4860,
-        3740
+        3880
       ],
       "id": "7ef2e9ef-2bd8-4a5d-8624-240a7e368875",
       "name": "Add error",
@@ -1368,7 +1368,7 @@
             {
               "id": "c28b9893-2319-4936-9bb8-8432d3392367",
               "name": "output",
-              "value": "=<thinking>\nSome thinking in here.\n</thinking>\n<answer>\nHere is my answer.\n</answer>",
+              "value": "=<thinking>\nSome thinking in here. OpenWebUI supports collapsable thinking tags. See the pipe code to see how to format the text so OpenWebUI sees it as a collapsable object.\n</thinking>\n<answer>\nHere is my answer. You're going to get the same answer over and over as this is just a demo to show that you get a status update from n8n, and then a reply from n8n. Of course, the reply from n8n could be from an AI Agent.\n\nYou can get the OpenWebUI pip code from here:\nhttps://openwebui.com/f/rabbithole/n8n_pipe\n\nYou can view the Github repository (https://github.com/yupguv/openwebui) to get the pipe code, as well as the n8n workflow JSON (code) and the supabase (postgres) database schema to easily set up a database and test the n8n workflow with database data, rather than hard-coded data.\n</answer>",
               "type": "string"
             }
           ]
@@ -1467,8 +1467,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -4680,
-        3340
+        -4760,
+        3380
       ],
       "id": "e1628763-33aa-4fdd-9fb6-9f5d72d338dd",
       "name": "Set final status message1"
@@ -1673,7 +1673,36 @@
       "name": "Sticky Note6"
     }
   ],
-  "pinData": {},
+  "pinData": {
+    "Webhook1": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.demodomain.dev",
+            "user-agent": "Python/3.11 aiohttp/3.11.8",
+            "content-length": "158",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate",
+            "authorization": "Bearer 6gdw363gfsh37ydnvb7",
+            "content-type": "application/json",
+            "x-forwarded-for": "172.18.0.1",
+            "x-forwarded-host": "n8n.demodomain.dev",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "sessionId": "3d552d68-4739-456d-8d45-718c67830b50",
+            "user_id": "f6baa18a-0fc4-478a-a082-214daea94a00",
+            "input": "status check",
+            "chatInput": "status check"
+          },
+          "webhookUrl": "https://n8n.demodomain.dev/webhook/98afd693-e6e9-4d18-bb72-0291622dc68c",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
   "connections": {
     "Set output": {
       "main": [
@@ -2207,7 +2236,7 @@
     "executionTimeout": 60,
     "errorWorkflow": "CFfBMte9SIT4VXGI"
   },
-  "versionId": "084c2850-82ca-4ae3-8a53-3f8818858d62",
+  "versionId": "6b2a2672-247c-44ae-81b8-ced7a4624c21",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0dd4d74541869392215391e2f2007af2df2b56dd54164ba601db9e62bc64e806"
