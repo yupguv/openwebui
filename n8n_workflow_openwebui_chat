@@ -98,7 +98,7 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.body.chatInput.includes(\"You are an autocompletion system\") || \n\n$json.body.chatInput.includes(\"Suitable Emojis for the summary\") }}",
+                    "leftValue": "={{ $('OpenWeb UI').item.json.body.chatInput.includes(\"You are an autocompletion system\") || $('OpenWeb UI').item.json.body.chatInput.includes(\"Suitable Emojis for the summary\") }}",
                     "rightValue": "",
                     "operator": {
                       "type": "boolean",
@@ -1671,38 +1671,23 @@
       "typeVersion": 1,
       "id": "16d78936-21fa-45d0-aa9b-dab3ebf44228",
       "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "OpenWebUI has setting where it can generate a title for your conversation, as well as tags. The request to generate this is sent to the same model that the user has selected to chat with. In this case, it means these requests are sent to this n8n workflow, which we want to ignore.",
+        "height": 220
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5260,
+        2260
+      ],
+      "typeVersion": 1,
+      "id": "dce63f2d-6372-4784-889f-01e638e42312",
+      "name": "Sticky Note7"
     }
   ],
-  "pinData": {
-    "Webhook1": [
-      {
-        "json": {
-          "headers": {
-            "host": "n8n.demodomain.dev",
-            "user-agent": "Python/3.11 aiohttp/3.11.8",
-            "content-length": "158",
-            "accept": "*/*",
-            "accept-encoding": "gzip, deflate",
-            "authorization": "Bearer 6gdw363gfsh37ydnvb7",
-            "content-type": "application/json",
-            "x-forwarded-for": "172.18.0.1",
-            "x-forwarded-host": "n8n.demodomain.dev",
-            "x-forwarded-proto": "https"
-          },
-          "params": {},
-          "query": {},
-          "body": {
-            "sessionId": "3d552d68-4739-456d-8d45-718c67830b50",
-            "user_id": "f6baa18a-0fc4-478a-a082-214daea94a00",
-            "input": "status check",
-            "chatInput": "status check"
-          },
-          "webhookUrl": "https://n8n.demodomain.dev/webhook/98afd693-e6e9-4d18-bb72-0291622dc68c",
-          "executionMode": "production"
-        }
-      }
-    ]
-  },
+  "pinData": {},
   "connections": {
     "Set output": {
       "main": [
@@ -2236,7 +2221,7 @@
     "executionTimeout": 60,
     "errorWorkflow": "CFfBMte9SIT4VXGI"
   },
-  "versionId": "6b2a2672-247c-44ae-81b8-ced7a4624c21",
+  "versionId": "f22a8736-2478-4e7a-8eeb-dd61242ed2df",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0dd4d74541869392215391e2f2007af2df2b56dd54164ba601db9e62bc64e806"
