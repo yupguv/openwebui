@@ -1,8 +1,6 @@
 """
 title: N8N pipe for OpenWebUI. Includes:
     - create an account here: https://webui.demodomain.dev/ to test the demo of this pip chatting with a live n8n workflow
-        - or log in using null@void.com, with a password of 12345
-        - If you do create an account, you can use a fake email, and if you use your real one, I won't spam you or anything stupid
     - pipe connects to n8n by sending user messages to an n8n webhook. Valves are:
         - URL for the main n8n webhook
         - URL for status check n8n webhook
@@ -90,7 +88,6 @@ class Pipe:
         payload = {
             "sessionId": __metadata__.get("chat_id"),
             "user_id": __user__["id"],
-            "input": "status check",
         }
         payload[self.valves.input_field] = "status check"
 
