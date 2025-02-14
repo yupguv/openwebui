@@ -1,5 +1,5 @@
 """
-title: Replicate.com custom image model pipe for OpenWebUI. Includes:
+title: Replicate.com custom image model pipe for OpenWebUI.
 author: demodomain.dev
 author_url: https://github.com/yupguv
 version: 1.0
@@ -43,8 +43,9 @@ import time
 OutputFormatType = Literal["jpg", "png"]
 NumberofOutputImages = Literal[1, 2, 3, 4]
 
+
 class Pipe:
-    """A pipe that generates images from your custom-trained model, using Replicate.com."""
+    """A pipe that generates Wincing Man images using Replicate.com."""
 
     class Valves(BaseModel):
         REPLICATE_API_TOKEN: str = Field(
@@ -72,8 +73,8 @@ class Pipe:
 
     def __init__(self):
         self.type = "pipe"
-        self.id = "Replicate custom trained model"
-        self.name = "Replicate custom trained model"
+        self.id = "Wincing Man"
+        self.name = "Wincing Man"
         self.MODEL_URL = "https://api.replicate.com/v1/predictions"
         self.valves = self.Valves(
             REPLICATE_API_TOKEN=os.getenv("REPLICATE_API_TOKEN", ""),
