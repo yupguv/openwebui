@@ -45,7 +45,7 @@ NumberofOutputImages = Literal[1, 2, 3, 4]
 
 
 class Pipe:
-    """A pipe that generates Wincing Man images using Replicate.com."""
+    """A pipe that generates images from a custom model created using Replicate.com."""
 
     class Valves(BaseModel):
         REPLICATE_API_TOKEN: str = Field(
@@ -73,8 +73,8 @@ class Pipe:
 
     def __init__(self):
         self.type = "pipe"
-        self.id = "Wincing Man"
-        self.name = "Wincing Man"
+        self.id = "custom image model"
+        self.name = "custom image model"
         self.MODEL_URL = "https://api.replicate.com/v1/predictions"
         self.valves = self.Valves(
             REPLICATE_API_TOKEN=os.getenv("REPLICATE_API_TOKEN", ""),
@@ -382,7 +382,7 @@ class Pipe:
                     {
                         "type": "status",
                         "data": {
-                            "description": "Starting Wincing Man generation...",
+                            "description": "Starting image generation...",
                             "done": False,
                         },
                     }
