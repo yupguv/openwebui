@@ -1,7 +1,4 @@
-Published as a community function:
-https://openwebui.com/f/rabbithole/n8n_pipe
-
-A set of three files that work together:
+Just noting here that 3 of the file in the repository are related so the below text is about those 3 only:
   1. Pipe for OpenWebUI to allow chatting with an n8n workflow: https://github.com/yupguv/openwebui/blob/main/n8n_pipe_for_openwebui
   2. Demo n8n workflow: https://github.com/yupguv/openwebui/blob/main/n8n_workflow_openwebui_chat
   3. Table definitions if you want to use Supabase nodes in the demo n8n workflow: https://github.com/yupguv/openwebui/blob/main/openwebui_n8n_supabase_tables
